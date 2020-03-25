@@ -6,8 +6,7 @@ using namespace std;
 typedef unsigned char uchar;
 
 const double pi = 3.141592653589793;
-uchar** arr;
-int** buffer;
+uchar* arr;
 int format, width, height, a;
 int bright;
 bool dir, dir2;
@@ -16,18 +15,23 @@ double fatness;
 double xa, ya, xb, yb, xc, yc, xd, yd;
 char filename_in[100], filename_out[100];
 
-double GammaCorrection(double Ipix, double Ibkgr) {
-    if(Ipix == Ibkgr)
-        return Ipix;
-    double I = Ibkgr + (bright - Ibkgr) * pow((Ipix - Ibkgr) / (bright - Ibkgr), (double)1 / gamma_);
-    return I;
+double GammaCorrection(double Ipix, int flag) {           // 1 - прямая гамма, -1 - обратная
+    double I = pow(Ipix / 255, pow(gamma_, flag));
+    return I * 255;
 }
 
 double sRGB(double pix) {
     pix /= 255;
     if(pix <= 0.0031308)
         return 12.92 * pix * 255;
-    else return (pow(1.055 * pix, 0.4167) - 0.055) * 255;
+    else return (1.055 * pow(pix, 0.4167) - 0.055) * 255;
+}
+
+double sRGB_reverse(double pix) {
+    pix /= 255;
+    if(pix <= 0.04045)
+        return pix / 12.92 * 255;
+    else return pow((pix + 0.055) / 1.055, 2.4) * 255;
 }
 
 void Plot(int x, int y, double intensity) {
@@ -38,10 +42,16 @@ void Plot(int x, int y, double intensity) {
     if(fatness < 1)
         intensity *= fatness;
     double back = 0;
-    if(intensity != 1)
-        back = (int)arr[y][x];
+    if(intensity != 1) {
+        back = (int) arr[y * width + x];
+        if(gamma_ != -1)
+            back = GammaCorrection(back, 1);
+        else back = sRGB_reverse(back);
+    }
     int z = (back + ((double)(bright - back) * intensity));
-    buffer[y][x] = z;
+    if(gamma_ != -1)
+        arr[y * width + x] = (char)GammaCorrection(z, -1);
+    else arr[y * width + x] = (char)sRGB(z);
 }
 
 void OutputImage() {
@@ -51,9 +61,8 @@ void OutputImage() {
         return;
     }
     fprintf_s(fout, "P%d\n%d %d\n%d\n", format, width, height, a);
-    for(int i = 0; i < height; i++) {
-        fwrite(arr[i], 1, width, fout);
-    }
+    fwrite(arr, 1, width * height, fout);
+    fclose(fout);
 }
 
 void ChangeDirection(double &x0, double &y00, double &x, double &y) {
@@ -72,27 +81,14 @@ void ChangeDirection(double &x0, double &y00, double &x, double &y) {
 
 void Bresenhem(double &x0, double &y00, double &x, double &y) {
     ChangeDirection(x0, y00, x, y);
-    bool done = false;
     double dx = x - x0;
     double dy = y - y00;
-    double delta = dy / dx;
+    double delta = dx == 0 ? 0 : dy / dx;
     double y_curr = y00;
-    if(y - (int)y > 0) {
-        for (int x_curr = x0; x_curr <= x; x_curr++) {
-            Plot(x_curr, (int) y_curr, 1 - (y_curr - (int) y_curr));
-            Plot(x_curr, (int) y_curr + 1, y_curr - (int) y_curr);
-            y_curr += delta;
-        }
-        done = true;
-    }
-    if((x - (int)x > 0) || (!done)) {
-        delta = dx / dy;
-        double x_curr = x0;
-        for (int y_cur = y00; y_cur <= y; y_cur++) {
-            Plot((int) x_curr, y_cur, 1 - (x_curr - (int) x_curr));
-            Plot((int) x_curr + 1, y_cur, x_curr - (int) x_curr);
-            x_curr += delta;
-        }
+    for (int x_curr = (int)x0; x_curr <= x; x_curr++) {
+        Plot(x_curr, (int) y_curr, 1 - (y_curr - (int) y_curr));
+        Plot(x_curr, (int) y_curr + 1, y_curr - (int) y_curr);
+        y_curr += delta;
     }
     if(dir) {
         swap(x, y);
@@ -105,8 +101,8 @@ void Bresenhem(double &x0, double &y00, double &x, double &y) {
 }
 
 bool Inside(double x, double y) {
-    return (y > (yb - ya) / (xb - xa) * (x - xa) + ya) && (y > (yd - yb) / (xd - xb) * (x - xb) + yb) &&
-           (y < (yd - yc) / (xd - xc) * (x - xc) + yc) && (y < (yc - ya) / (xc - xa) * (x - xa) + ya);
+    return (y >= (yb - ya) / (xb - xa) * (x - xa) + ya) && (y >= (yd - yb) / (xd - xb) * (x - xb) + yb) &&
+           (y <= (yd - yc) / (xd - xc) * (x - xc) + yc) && (y <= (yc - ya) / (xc - xa) * (x - xa) + ya);
 }
 
 void FillRectangle(double x, double y) {
@@ -135,32 +131,54 @@ int main(int argc, char* argv[]) {
         std::cerr << "Cannot open file!\n";
         return 1;
     }
-    fscanf(fin, "P%d\n%d %d\n%d\n", &format, &width, &height, &a);
-    arr = new uchar*[height];
-    buffer = new int*[height];
-    for(int i = 0; i < height; i++) {
-        arr[i] = new uchar[width];
-        buffer[i] = new int[width];
-        fread(arr[i], 1, width, fin);
-        for(int j = 0; j < width; j++)
-            buffer[i][j] = -1;
+    if(fscanf(fin, "P%d\n%d %d\n%d\n", &format, &width, &height, &a) != 4) {
+        std::cerr << "Something wrong with input file.\n";
+        return 1;
     }
+    if(format != 5) {
+        std::cerr << "File has wrong format!\n";
+        return 1;
+    }
+    arr = new uchar[height * width];
+    fread(arr, 1, width * height, fin);
+    if(gamma_ == -1)
+        sRGB_reverse(bright);
+    else GammaCorrection(bright, 1);
     if(fatness > 1) {
         double alpha = x - x0 == 0 ? 0 : (90 * pi / 180) - abs(atan((y - y00) / (x - x0)));
-        xa = x0 - (fatness / 2) * cos(alpha);
-        ya = y00 + (fatness / 2) * sin(alpha);
-        xb = x0 + (fatness / 2) * cos(alpha);
-        yb = y00 - (fatness / 2) * sin(alpha);
-        xc = x - (fatness / 2) * cos(alpha);
-        yc = y + (fatness / 2) * sin(alpha);
-        xd = x + (fatness / 2) * cos(alpha);
-        yd = y - (fatness / 2) * sin(alpha);
-        if (xa > xc) {
-            swap(xa, xc);
-            swap(ya, yc);
-            swap(xb, xd);
-            swap(yb, yd);
+        if((y - y00) / (x - x0) > 0) {
+            xa = x0 - (fatness / 2) * cos(alpha);
+            ya = y00 + (fatness / 2) * sin(alpha);
+            xb = x0 + (fatness / 2) * cos(alpha);
+            yb = y00 - (fatness / 2) * sin(alpha);
+            xc = x - (fatness / 2) * cos(alpha);
+            yc = y + (fatness / 2) * sin(alpha);
+            xd = x + (fatness / 2) * cos(alpha);
+            yd = y - (fatness / 2) * sin(alpha);
+            if (xa > xc) {
+                swap(xa, xc);
+                swap(ya, yc);
+                swap(xb, xd);
+                swap(yb, yd);
+            }
         }
+        else {
+            xa = x0 - (fatness / 2) * cos(alpha);
+            ya = y00 - (fatness / 2) * sin(alpha);
+            xb = x - (fatness / 2) * cos(alpha);
+            yb = y - (fatness / 2) * sin(alpha);
+            xc = x0 + (fatness / 2) * cos(alpha);
+            yc = y00 + (fatness / 2) * sin(alpha);
+            xd = x + (fatness / 2) * cos(alpha);
+            yd = y + (fatness / 2) * sin(alpha);
+            if(xb < xa) {
+                swap(xa, xb);
+                swap(ya, yb);
+                swap(xc, xd);
+                swap(yc, yd);
+            }
+        }
+        //printf("A: %f %f\nB: %f %f\nC: %f %f\nD: %f %f", xa, ya, xb, yb, xc, yc, xd, yd);
         Bresenhem(xa, ya, xb, yb);
         Bresenhem(xc, yc, xd, yd);
         Bresenhem(xa, ya, xc, yc);
@@ -171,13 +189,8 @@ int main(int argc, char* argv[]) {
                 FillRectangle(j, i);
     }
     else Bresenhem(x0, y00, x, y);
-    for(int i = 0; i < height; i++)
-        for(int j = 0; j < width; j++)
-            if(buffer[i][j] != -1) {
-                if(gamma_ != -1)
-                    arr[i][j] = (char) GammaCorrection(buffer[i][j], (int) arr[i][j]);
-                else arr[i][j] = (char)sRGB(buffer[i][j]);
-            }
     OutputImage();
+    fclose(fin);
+    delete[] arr;
     return 0;
 }
