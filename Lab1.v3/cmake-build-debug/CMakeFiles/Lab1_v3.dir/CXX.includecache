@@ -6,15 +6,25 @@
 
 #IncludeRegexTransform: 
 
-D:/Desktop/LABS/2sem/KGiG/Lab1.v3/cmake-build-debug/pgmwork.cpp
-pgmwork.h
-D:/Desktop/LABS/2sem/KGiG/Lab1.v3/cmake-build-debug/pgmwork.h
-fstream
--
-
 D:/Desktop/LABS/2sem/KGiG/Lab1.v3/cmake-build-debug/pgmwork.h
 string
 -
 iostream
 -
+
+D:/Desktop/LABS/2sem/KGiG/Lab1.v3/cmake-build-debug/ppmwork.h
+string
+-
+iostream
+-
+
+D:/Desktop/LABS/2sem/KGiG/Lab1.v3/main.cpp
+iostream
+-
+fstream
+-
+cmake-build-debug/pgmwork.h
+D:/Desktop/LABS/2sem/KGiG/Lab1.v3/cmake-build-debug/pgmwork.h
+cmake-build-debug/ppmwork.h
+D:/Desktop/LABS/2sem/KGiG/Lab1.v3/cmake-build-debug/ppmwork.h
 

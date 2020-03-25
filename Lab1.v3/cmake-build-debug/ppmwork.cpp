@@ -17,7 +17,7 @@ void Inverse1(string str, int width, int height, int a, string filename, char* a
         fout << char(255 - (int)arr[i]);
 }
 
-void HorisonReflection1(string str, int width, int height, int a, string filename, char* arr) {
+void VerticalReflection1(string str, int width, int height, int a, string filename, char* arr) {
     ofstream fout(filename, ios::binary);
     if(!fout){
         cout << "Cannot create file!\n";
@@ -30,7 +30,7 @@ void HorisonReflection1(string str, int width, int height, int a, string filenam
     fout.close();
 }
 
-void VerticalReflection1(string str, int width, int height, int a, string filename, char* arr) {
+void HorisonReflection1(string str, int width, int height, int a, string filename, char* arr) {
     ofstream fout(filename, ios::binary);
     if(!fout){
         cout << "Cannot create file!\n";

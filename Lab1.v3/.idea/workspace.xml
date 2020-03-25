@@ -11,7 +11,20 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d95158a5-34b8-4b1c-8b7a-1a33c7839f52" name="Default Changelist" comment="" />
+    <list default="true" id="d95158a5-34b8-4b1c-8b7a-1a33c7839f52" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/Lab1_v3.dir/CXX.includecache" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/Lab1_v3.dir/CXX.includecache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/Lab1_v3.dir/main.cpp.obj" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/Lab1_v3.dir/main.cpp.obj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/Lab1_v3.dir/objects.a" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/Lab1_v3.dir/objects.a" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/Lab1_v3.dir/pgmwork.cpp.obj" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/Lab1_v3.dir/pgmwork.cpp.obj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/Lab1_v3.dir/ppmwork.cpp.obj" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/Lab1_v3.dir/ppmwork.cpp.obj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/Lab1_v3.exe" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/Lab1_v3.exe" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/lol.pgm" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/lol.pgm" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/pgmwork.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/pgmwork.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/ppmwork.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/ppmwork.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/main.cpp" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -21,7 +34,11 @@
     <option name="formatViaClangd" value="false" />
   </component>
   <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Debug" />
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
   <component name="ProjectId" id="1XyjmrSc7RkUMl9OAuNdNBRzlIq" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showExcludedFiles" value="true" />
@@ -29,8 +46,9 @@
   </component>
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$USER_HOME$/CLionProjects/forAlgosi" />
     <property name="settings.editor.selected.configurable" value="CPPToolchains" />
   </component>
   <component name="RecentsManager">
@@ -72,7 +90,10 @@
       <workItem from="1582025392096" duration="2120000" />
       <workItem from="1582028507389" duration="8455000" />
       <workItem from="1582055805911" duration="4249000" />
-      <workItem from="1582102148098" duration="3833000" />
+      <workItem from="1582102148098" duration="9283000" />
+      <workItem from="1582118325997" duration="2940000" />
+      <workItem from="1582231341167" duration="1883000" />
+      <workItem from="1582263965907" duration="46000" />
     </task>
     <servers />
   </component>
@@ -80,26 +101,26 @@
     <option name="version" value="1" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="548" y="188" key="FileChooserDialogImpl" timestamp="1582030601978">
+    <state x="548" y="188" key="FileChooserDialogImpl" timestamp="1582264011583">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
-    <state x="548" y="188" key="FileChooserDialogImpl/0.0.1536.864@0.0.1536.864" timestamp="1582030601978" />
-    <state width="1493" height="223" key="GridCell.Tab.0.bottom" timestamp="1582105913067">
+    <state x="548" y="188" key="FileChooserDialogImpl/0.0.1536.864@0.0.1536.864" timestamp="1582264011583" />
+    <state width="1493" height="223" key="GridCell.Tab.0.bottom" timestamp="1582112363595">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
-    <state width="1493" height="223" key="GridCell.Tab.0.bottom/0.0.1536.864@0.0.1536.864" timestamp="1582105913067" />
-    <state width="1493" height="223" key="GridCell.Tab.0.center" timestamp="1582105913067">
+    <state width="1493" height="223" key="GridCell.Tab.0.bottom/0.0.1536.864@0.0.1536.864" timestamp="1582112363595" />
+    <state width="1493" height="223" key="GridCell.Tab.0.center" timestamp="1582112363595">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
-    <state width="1493" height="223" key="GridCell.Tab.0.center/0.0.1536.864@0.0.1536.864" timestamp="1582105913067" />
-    <state width="1493" height="223" key="GridCell.Tab.0.left" timestamp="1582105913066">
+    <state width="1493" height="223" key="GridCell.Tab.0.center/0.0.1536.864@0.0.1536.864" timestamp="1582112363595" />
+    <state width="1493" height="223" key="GridCell.Tab.0.left" timestamp="1582112363595">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
-    <state width="1493" height="223" key="GridCell.Tab.0.left/0.0.1536.864@0.0.1536.864" timestamp="1582105913066" />
-    <state width="1493" height="223" key="GridCell.Tab.0.right" timestamp="1582105913067">
+    <state width="1493" height="223" key="GridCell.Tab.0.left/0.0.1536.864@0.0.1536.864" timestamp="1582112363595" />
+    <state width="1493" height="223" key="GridCell.Tab.0.right" timestamp="1582112363595">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
-    <state width="1493" height="223" key="GridCell.Tab.0.right/0.0.1536.864@0.0.1536.864" timestamp="1582105913067" />
+    <state width="1493" height="223" key="GridCell.Tab.0.right/0.0.1536.864@0.0.1536.864" timestamp="1582112363595" />
     <state width="1493" height="277" key="GridCell.Tab.1.bottom" timestamp="1582038552832">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
