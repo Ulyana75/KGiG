@@ -79,7 +79,7 @@ void ChangeDirection(double &x0, double &y00, double &x, double &y) {
     }
 }
 
-void Bresenhem(double &x0, double &y00, double &x, double &y) {
+void Bresenhem(double x0, double y00, double x, double y) {
     ChangeDirection(x0, y00, x, y);
     double dx = x - x0;
     double dy = y - y00;
@@ -90,19 +90,11 @@ void Bresenhem(double &x0, double &y00, double &x, double &y) {
         Plot(x_curr, (int) y_curr + 1, y_curr - (int) y_curr);
         y_curr += delta;
     }
-    if(dir) {
-        swap(x, y);
-        swap(y00, x0);
-    }
-    if(dir2) {
-        swap(x, x0);
-        swap(y, y00);
-    }
 }
 
 bool Inside(double x, double y) {
-    return (y >= (yb - ya) / (xb - xa) * (x - xa) + ya) && (y >= (yd - yb) / (xd - xb) * (x - xb) + yb) &&
-           (y <= (yd - yc) / (xd - xc) * (x - xc) + yc) && (y <= (yc - ya) / (xc - xa) * (x - xa) + ya);
+    return (y >= (yb - ya) / (xb - xa) * (x - xa) + ya) && (y > (yd - yb) / (xd - xb) * (x - xb) + yb) &&
+           (y < (yd - yc) / (xd - xc) * (x - xc) + yc) && (y < (yc - ya) / (xc - xa) * (x - xa) + ya);
 }
 
 void FillRectangle(double x, double y) {
@@ -142,8 +134,8 @@ int main(int argc, char* argv[]) {
     arr = new uchar[height * width];
     fread(arr, 1, width * height, fin);
     if(gamma_ == -1)
-        sRGB_reverse(bright);
-    else GammaCorrection(bright, 1);
+        bright = sRGB_reverse(bright);
+    else bright = GammaCorrection(bright, 1);
     if(fatness > 1) {
         double alpha = x - x0 == 0 ? 0 : (90 * pi / 180) - abs(atan((y - y00) / (x - x0)));
         if((y - y00) / (x - x0) > 0) {
@@ -178,11 +170,23 @@ int main(int argc, char* argv[]) {
                 swap(yc, yd);
             }
         }
-        //printf("A: %f %f\nB: %f %f\nC: %f %f\nD: %f %f", xa, ya, xb, yb, xc, yc, xd, yd);
-        Bresenhem(xa, ya, xb, yb);
-        Bresenhem(xc, yc, xd, yd);
-        Bresenhem(xa, ya, xc, yc);
-        Bresenhem(xb, yb, xd, yd);
+        //printf("A: %f %f\nB: %f %f\nC: %f %f\nD: %f %f\n", xa, ya, xb, yb, xc, yc, xd, yd);
+        if((ya == yb) && (yc == yd) && (x0 != x)) {
+            Bresenhem(xa, ya + 1, xc, yc);
+            Bresenhem(xb, yb + 1, xd, yd);
+        }
+        else {
+            Bresenhem(xa, ya, xc, yc);
+            Bresenhem(xb, yb, xd, yd);
+        }
+        if((xa == xc) && (xb == xd) && (y != y00)) {
+            Bresenhem(xa + 1, ya, xb, yb);
+            Bresenhem(xc + 1, yc, xd, yd);
+        }
+        else {
+            Bresenhem(xa, ya, xb, yb);
+            Bresenhem(xc, yc, xd, yd);
+        }
         dir = false;
         for (int i = 0; i < height; i++)
             for (int j = 0; j < width; j++)
