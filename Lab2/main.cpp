@@ -2,21 +2,20 @@
 #include <algorithm>
 #include <cmath>
 #include <string.h>
+#define _USE_MATH_DEFINES
 using namespace std;
 typedef unsigned char uchar;
 
-const long double pi = 3.1415926535897932384626433832795028841971693993751058209749;
 uchar* arr;
 int* buffer;
 int format, width, height, a;
 int bright;
-bool dir, dir2;
+bool dir;
 double gamma_ = -1;
 double fatness;
 double xa, ya, xb, yb, xc, yc, xd, yd;
 double alpha;
 char filename_in[100], filename_out[100];
-bool b = false;
 
 double GammaCorrection(double Ipix, int flag) {           // 1 - прямая гамма, -1 - обратная
     double I = pow(Ipix / 255, pow(gamma_, flag));
@@ -70,19 +69,18 @@ void OutputImage() {
 
 void ChangeDirection(double &x0, double &y00, double &x, double &y) {
     dir = abs(y - y00) > abs(x - x0);
-    dir2 = false;
     if(dir) {
         swap(x, y);
         swap(y00, x0);
     }
     if(x0 > x) {
-        dir2 = true;
         swap(x, x0);
         swap(y, y00);
     }
 }
 
 void Bresenhem(double x0, double y00, double x, double y) {
+    //printf("Im drawing (%f %f) - > (%f %f)\n", x0, y00, x, y);
     ChangeDirection(x0, y00, x, y);
     double dx = x - x0;
     double dy = y - y00;
@@ -90,7 +88,7 @@ void Bresenhem(double x0, double y00, double x, double y) {
     double y_curr = y00;
     for (int x_curr = x0; x_curr <= x; x_curr++) {
         Plot(x_curr, y_curr, 1 - (y_curr - (int) y_curr));
-        if((alpha * 180 / pi != 45) || (fatness <= 1))
+        if ((alpha * 180 / M_PI != 45) || (fatness <= 1))
             Plot(x_curr, y_curr + 1, y_curr - (int) y_curr);
         y_curr += delta;
     }
@@ -127,16 +125,16 @@ bool Inside(double x, double y) {
     Vector bo = {x - xb, y - yb}; if(bo.l == 0) return true;
     Vector Do = {x - xd, y - yd}; if(Do.l == 0) return true;
     Vector co = {x - xc, y - yc}; if(co.l == 0) return true;
-    long double oab = acos(ao * ab / (ao.l * ab.l)) * 180 / pi;
-    long double oac = acos(ao * (-ca) / (ao.l * ca.l)) * 180 / pi;
-    long double oba = acos(bo * (-ab) / (bo.l * ab.l)) * 180 / pi;
-    long double obd = acos(bo * bd / (bo.l * bd.l)) * 180 / pi;
-    long double odc = acos(Do * dc / (Do.l * dc.l)) * 180 / pi;
-    long double odb = acos(Do * (-bd) / (Do.l * bd.l)) * 180 / pi;
-    long double ocd = acos(co * (-dc) / (co.l * dc.l)) * 180 / pi;
-    long double oca = acos(co * ca / (co.l * ca.l)) * 180 / pi;
+    long double oab = acos(ao * ab / (ao.l * ab.l)) * 180 / M_PI;
+    long double oac = acos(ao * (-ca) / (ao.l * ca.l)) * 180 / M_PI;
+    long double oba = acos(bo * (-ab) / (bo.l * ab.l)) * 180 / M_PI;
+    long double obd = acos(bo * bd / (bo.l * bd.l)) * 180 / M_PI;
+    long double odc = acos(Do * dc / (Do.l * dc.l)) * 180 / M_PI;
+    long double odb = acos(Do * (-bd) / (Do.l * bd.l)) * 180 / M_PI;
+    long double ocd = acos(co * (-dc) / (co.l * dc.l)) * 180 / M_PI;
+    long double oca = acos(co * ca / (co.l * ca.l)) * 180 / M_PI;
     long double sum = (180 - oab - oba) + (180 - obd - odb) + (180 - odc - ocd) +  (180 - oca - oac);
-    if((y >= (yd - yc) / (xd - xc) * (x - xc) + yc - 1) && !((xa == xc) || (ya == yc)))
+    if((y >= (yd - yc) / (xd - xc) * (x - xc) + yc - 1) && !((xa == xc) || (ya == yc)) && (alpha * 180 / M_PI == 45))
         return false;
     return (sum < 360.0000001) && (sum > 359.9999999);
 }
@@ -144,10 +142,15 @@ bool Inside(double x, double y) {
 void CheckIsRight() {
     for(int i = 1; i < height - 1; i++)
         for(int j = 1; j < width - 1; j++)
-            if((buffer[i * width + j] == -1) && (buffer[i * width + j + 1] != -1) &&
-                    (buffer[i * width + j - 1] != -1) && (buffer[(i + 1) * width + j] != -1) &&
-                    (buffer[(i - 1) * width + j] != -1))
-                Plot(j, i, 1);
+            if(buffer[i * width + j] == -1) {
+                int count = 0;
+                if(buffer[i * width + j + 1] != -1) count++;
+                if(buffer[i * width + j - 1] != -1) count++;
+                if(buffer[(i + 1) * width + j] != -1) count++;
+                if(buffer[(i - 1) * width + j] != -1) count++;
+                if(count == 4)
+                    Plot(j, i, 1);
+            }
 }
 
 void FillRectangle(double x, double y) {
@@ -193,7 +196,7 @@ int main(int argc, char* argv[]) {
         bright = sRGB_reverse(bright);
     else bright = GammaCorrection(bright, 1);
     if(fatness > 1) {
-        alpha = x - x0 == 0 ? 0 : (90 * pi / 180) - abs(atan((y - y00) / (x - x0)));
+        alpha = x - x0 == 0 ? 0 : (90 * M_PI / 180) - abs(atan((y - y00) / (x - x0)));
         if((y - y00) / (x - x0) > 0) {
             xa = x0 - (fatness / 2) * cos(alpha);
             ya = y00 + (fatness / 2) * sin(alpha);
@@ -225,23 +228,14 @@ int main(int argc, char* argv[]) {
                 swap(xc, xd);
                 swap(yc, yd);
             }
-            b = true;
         }
-        if(alpha * 180 / pi == 45) {
+        if(alpha * 180 / M_PI == 45) {
             dir = false;
             for (int i = 0; i < height; i++)
                 for (int j = 0; j < width; j++)
                     FillRectangle(j, i);
         }
-        //printf("A: %f %f\nB: %f %f\nC: %f %f\nD: %f %f\nalpha = %f\n", xa, ya, xb, yb, xc, yc, xd, yd, alpha * 180 / pi);
-        if((ya == yb) && (yc == yd) && (x0 != x)) {
-            Bresenhem(xa, ya + 1, xc, yc);
-            Bresenhem(xb, yb + 1, xd, yd);
-        }
-        else {
-            Bresenhem(xa, ya, xc, yc);
-            Bresenhem(xb, yb, xd, yd);
-        }
+        //printf("A: %f %f\nB: %f %f\nC: %f %f\nD: %f %f\nalpha = %Lf\n", xa, ya, xb, yb, xc, yc, xd, yd, alpha * 180 / M_PI);
         if((xa == xc) && (xb == xd) && (y != y00)) {
             Bresenhem(xa + 1, ya, xb, yb);
             Bresenhem(xc + 1, yc, xd, yd);
@@ -250,7 +244,15 @@ int main(int argc, char* argv[]) {
             Bresenhem(xa, ya, xb, yb);
             Bresenhem(xc, yc, xd, yd);
         }
-        if(alpha * 180 / pi != 45) {
+        if((ya == yb) && (yc == yd) && (x0 != x)) {
+            Bresenhem(xa, ya + 1, xc, yc);
+            Bresenhem(xb, yb + 1, xd, yd);
+        }
+        else {
+            Bresenhem(xa, ya, xc, yc);
+            Bresenhem(xb, yb, xd, yd);
+        }
+        if(alpha * 180 / M_PI != 45) {
             dir = false;
             for (int i = 0; i < height; i++)
                 for (int j = 0; j < width; j++)
