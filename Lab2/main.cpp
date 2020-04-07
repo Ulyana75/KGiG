@@ -1,8 +1,8 @@
 #include <iostream>
 #include <algorithm>
+#define _USE_MATH_DEFINES
 #include <cmath>
 #include <string.h>
-#define _USE_MATH_DEFINES
 using namespace std;
 typedef unsigned char uchar;
 
@@ -80,7 +80,6 @@ void ChangeDirection(double &x0, double &y00, double &x, double &y) {
 }
 
 void Bresenhem(double x0, double y00, double x, double y) {
-    //printf("Im drawing (%f %f) - > (%f %f)\n", x0, y00, x, y);
     ChangeDirection(x0, y00, x, y);
     double dx = x - x0;
     double dy = y - y00;
@@ -235,7 +234,6 @@ int main(int argc, char* argv[]) {
                 for (int j = 0; j < width; j++)
                     FillRectangle(j, i);
         }
-        //printf("A: %f %f\nB: %f %f\nC: %f %f\nD: %f %f\nalpha = %Lf\n", xa, ya, xb, yb, xc, yc, xd, yd, alpha * 180 / M_PI);
         if((xa == xc) && (xb == xd) && (y != y00)) {
             Bresenhem(xa + 1, ya, xb, yb);
             Bresenhem(xc + 1, yc, xd, yd);
