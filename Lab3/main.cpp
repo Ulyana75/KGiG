@@ -1,6 +1,8 @@
 #include <iostream>
 #include <cmath>
 #include <string.h>
+#include <ctime>
+
 typedef unsigned char uchar;
 
 int format, width, height, a;
@@ -18,10 +20,11 @@ int OutputImage();
 
 void DrawGradient() {
     for(int i = 0; i < width; i++) {
-        double pos = (double)i / width;
+        double pos = (double)i / (width - 1);
         int color = pos * 255;
-        for(int j = 0; j < height; j++)
+        for(int j = 0; j < height; j++) {
             arr[j * width + i] = color;
+        }
     }
 }
 
@@ -74,7 +77,7 @@ int OtherBitness(int color) {
 
 int FindNearestColor(int color) {
     int min_ = INT_MAX, j;
-    for(int i = 0; i < 255; i++)
+    for(int i = 0; i < 256; i++)
         if(abs(color - p[i]) < min_) {
             min_ = abs(color - p[i]);
             j = i;
@@ -85,7 +88,7 @@ int FindNearestColor(int color) {
 void NoDithering() {
     for(int i = 0; i < height; i++)
         for(int j = 0; j < width; j++)
-            arr[i * width + j] = FindNearestColor((int)arr[i * width + j]);
+            arr[i * width + j] = OtherBitness((int)arr[i * width + j]);
 }
 
 void OrderedDithering() {
@@ -110,10 +113,13 @@ void OrderedDithering() {
 }
 
 void RandomDithering() {
+    srand(time(0));
     for(int i = 0; i < height; i++)
         for(int j = 0; j < width; j++) {
-            int color = (int)arr[i * width + j] + 255 * (double(rand() % 100000) / (double)99999) - 0.5;
-            arr[i * width + j] = FindNearestColor(color);
+            int a = rand() % 256;
+            if(a > arr[i * width + j])
+                arr[i * width + j] = 0;
+            else arr[i * width + j] = 255;
         }
 }
 
@@ -193,7 +199,7 @@ void Sierra3() {
         for(int j = 0; j < width; j++) {
             int color = (int)arr[i * width + j];
             int new_color = FindNearestColor(color);
-            int error = color - new_color;
+            double error = color - new_color;
             arr[i * width + j] = new_color;
             if(i + 1 < height) {
                 if(j - 2 >= 0)
@@ -304,10 +310,11 @@ int main(int argc, char* argv[]) {
             return 1;
     }
 
-    for(int i = 0; i < height * width; i++)
-        if(gamma_ == 0)
+    for(int i = 0; i < height * width; i++) {
+        if (gamma_ == 0)
             arr[i] = sRGB(arr[i]);
         else arr[i] = GammaCorrection(arr[i], -1);
+    }
 
     OutputImage();
 
