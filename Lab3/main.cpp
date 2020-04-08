@@ -116,10 +116,8 @@ void RandomDithering() {
     srand(time(0));
     for(int i = 0; i < height; i++)
         for(int j = 0; j < width; j++) {
-            int a = rand() % 256;
-            if(a > arr[i * width + j])
-                arr[i * width + j] = 0;
-            else arr[i * width + j] = 255;
+            int color = (int)arr[i * width + j] + 255 * ((rand() % 256 + 1) / 256.0 - 0.5);
+            arr[i * width + j] = FindNearestColor(color);
         }
 }
 
