@@ -4,7 +4,8 @@
 typedef unsigned char uchar;
 
 int format, width, height, a;
-uchar* arr;
+double* arr;
+uchar* buffer;
 double gamma_;
 int gradient, diz, b;
 int* p;
@@ -14,17 +15,18 @@ char filename_in[100], filename_out[100];
 int InputImage();
 int OutputImage();
 
+
 void DrawGradient() {
     for(int i = 0; i < width; i++) {
         double pos = (double)i / width;
         int color = pos * 255;
         for(int j = 0; j < height; j++)
-            arr[j * height + i] = (char)color;
+            arr[j * width + i] = color;
     }
 }
 
 double GammaCorrection(double Ipix, int flag) {           // 1 - прямая гамма, -1 - обратная
-    double I = pow(Ipix / 255, pow(gamma_, flag));
+    double I = pow(Ipix / 255.0, pow(gamma_, flag));
     return I * 255;
 }
 
@@ -83,7 +85,7 @@ int FindNearestColor(int color) {
 void NoDithering() {
     for(int i = 0; i < height; i++)
         for(int j = 0; j < width; j++)
-            arr[i * width + j] = (char)FindNearestColor((int)arr[i * width + j]);
+            arr[i * width + j] = FindNearestColor((int)arr[i * width + j]);
 }
 
 void OrderedDithering() {
@@ -110,7 +112,7 @@ void OrderedDithering() {
 void RandomDithering() {
     for(int i = 0; i < height; i++)
         for(int j = 0; j < width; j++) {
-            int color = (int)arr[i * width + j] + 255 * (double(rand() % 1000000) / (double)999999) - 0.5;
+            int color = (int)arr[i * width + j] + 255 * (double(rand() % 100000) / (double)99999) - 0.5;
             arr[i * width + j] = FindNearestColor(color);
         }
 }
@@ -138,15 +140,15 @@ void FloydSteinberg() {
             int color = (int)arr[i * width + j];
             int new_color = FindNearestColor(color);
             double error = color - new_color;
-            arr[i * width + j] = (char)new_color;
+            arr[i * width + j] = new_color;
             if((j - 1 >= 0) && (i + 1 < height))
-                arr[(i + 1) * width + j - 1] += char(error * 3 / 16);
+                arr[(i + 1) * width + j - 1] += error * 3 / 16;
             if(i + 1 < height)
-                arr[(i + 1) * width + j] += char(error * 5 / 16);
+                arr[(i + 1) * width + j] += error * 5 / 16;
             if((i + 1 < height) && (j + 1 < width))
-                arr[(i + 1) * width + j + 1] += char(error * 1 / 16);
+                arr[(i + 1) * width + j + 1] += error * 1 / 16;
             if(j + 1 < width)
-                arr[i * width + j + 1] += char(error * 7 / 16);
+                arr[i * width + j + 1] += error * 7 / 16;
         }
 }
 
@@ -156,33 +158,33 @@ void JarvisJudiceNinke() {
             int color = (int)arr[i * width + j];
             int new_color = FindNearestColor(color);
             double error = color - new_color;
-            arr[i * width + j] = (char)new_color;
+            arr[i * width + j] = new_color;
             if(i + 1 < height) {
                 if(j - 2 >= 0)
-                    arr[(i + 1) * width + j - 2] += char(error * 3 / 48);
+                    arr[(i + 1) * width + j - 2] += error * 3 / 48;
                 if(j - 1 >= 0)
-                    arr[(i + 1) * width + j - 1] += char(error * 5 / 48);
-                arr[(i + 1) * width + j] += char((double)error * 7 / 48);
+                    arr[(i + 1) * width + j - 1] += error * 5 / 48;
+                arr[(i + 1) * width + j] += error * 7 / 48;
                 if(j + 1 < width)
-                    arr[(i + 1) * width + j + 1] += char(error * 5 / 48);
+                    arr[(i + 1) * width + j + 1] += error * 5 / 48;
                 if(j + 2 < width)
-                    arr[(i + 1) * width + j + 2] += char(error * 3 / 48);
+                    arr[(i + 1) * width + j + 2] += error * 3 / 48;
             }
             if(i + 2 < height) {
                 if(j - 2 >= 0)
-                    arr[(i + 2) * width + j - 2] += char(error * 1 / 48);
+                    arr[(i + 2) * width + j - 2] += error * 1 / 48;
                 if(j - 1 >= 0)
-                    arr[(i + 2) * width + j - 1] += char(error * 3 / 48);
-                arr[(i + 2) * width + j] += char(error * 5 / 48);
+                    arr[(i + 2) * width + j - 1] += error * 3 / 48;
+                arr[(i + 2) * width + j] += error * 5 / 48;
                 if(j + 1 < width)
-                    arr[(i + 2) * width + j + 1] += char(error * 3 / 48);
+                    arr[(i + 2) * width + j + 1] += error * 3 / 48;
                 if(j + 2 < width)
-                    arr[(i + 2) * width + j + 2] += char(error * 1 / 48);
+                    arr[(i + 2) * width + j + 2] += error * 1 / 48;
             }
             if(j + 1 < width)
-                arr[i * width + j + 1] += char(error * 7 / 48);
+                arr[i * width + j + 1] += error * 7 / 48;
             if(j + 2 < width)
-                arr[i * width + j + 2] += char(error * 5 / 48);
+                arr[i * width + j + 2] += error * 5 / 48;
         }
 }
 
@@ -192,29 +194,29 @@ void Sierra3() {
             int color = (int)arr[i * width + j];
             int new_color = FindNearestColor(color);
             int error = color - new_color;
-            arr[i * width + j] = (char)new_color;
+            arr[i * width + j] = new_color;
             if(i + 1 < height) {
                 if(j - 2 >= 0)
-                    arr[(i + 1) * width + j - 2] += char(error * 2 / 32);
+                    arr[(i + 1) * width + j - 2] += error * 2 / 32;
                 if(j - 1 >= 0)
-                    arr[(i + 1) * width + j - 1] += char(error * 4 / 32);
-                arr[(i + 1) * width + j] += char(error * 5 / 32);
+                    arr[(i + 1) * width + j - 1] += error * 4 / 32;
+                arr[(i + 1) * width + j] += error * 5 / 32;
                 if(j + 1 < width)
-                    arr[(i + 1) * width + j + 1] += char(error * 4 / 32);
+                    arr[(i + 1) * width + j + 1] += error * 4 / 32;
                 if(j + 2 < width)
-                    arr[(i + 1) * width + j + 2] += char(error * 2 / 32);
+                    arr[(i + 1) * width + j + 2] += error * 2 / 32;
             }
             if(i + 2 < height) {
                 if(j - 1 >= 0)
-                    arr[(i + 2) * width + j - 1] += char(error * 2 / 32);
-                arr[(i + 2) * width + j] += char(error * 3 / 32);
+                    arr[(i + 2) * width + j - 1] += error * 2 / 32;
+                arr[(i + 2) * width + j] += error * 3 / 32;
                 if(j + 1 < width)
-                    arr[(i + 2) * width + j + 1] += char(error * 2 / 32);
+                    arr[(i + 2) * width + j + 1] += error * 2 / 32;
             }
             if(j + 1 < width)
-                arr[i * width + j + 1] += char(error * 5 / 32);
+                arr[i * width + j + 1] += error * 5 / 32;
             if(j + 2 < width)
-                arr[i * width + j + 2] += char(error * 3 / 32);
+                arr[i * width + j + 2] += error * 3 / 32;
         }
 }
 
@@ -224,20 +226,20 @@ void Atkinson() {
             int color = (int)arr[i * width + j];
             int new_color = FindNearestColor(color);
             double error = color - new_color;
-            arr[i * width + j] = (char)new_color;
+            arr[i * width + j] = new_color;
             if(i + 1 < height) {
                 if(j - 1 >= 0)
-                    arr[(i + 1) * width + j - 1] += char(error / 8);
-                arr[(i + 1) * width + j] += char(error / 8);
+                    arr[(i + 1) * width + j - 1] += error / 8;
+                arr[(i + 1) * width + j] += error / 8;
                 if(j + 1 < width)
-                    arr[(i + 1) * width + j + 1] += char(error / 8);
+                    arr[(i + 1) * width + j + 1] += error / 8;
             }
             if(i + 2 < height)
-                arr[(i + 2) * width + j] += char(error / 8);
+                arr[(i + 2) * width + j] += error / 8;
             if(j + 1 < width)
-                arr[i * width + j + 1] += char(error / 8);
+                arr[i * width + j + 1] += error / 8;
             if(j + 2 < width)
-                arr[i * width + j + 2] += char(error / 8);
+                arr[i * width + j + 2] += error / 8;
         }
 }
 
@@ -264,8 +266,8 @@ int main(int argc, char* argv[]) {
     if(!gradient) {
         for (int i = 0; i < height * width; i++)
             if (gamma_ == 0)
-                arr[i] = (char) sRGB_reverse(arr[i]);
-            else arr[i] = (char) GammaCorrection(arr[i], 1);
+                arr[i] = sRGB_reverse(arr[i]);
+            else arr[i] = GammaCorrection(arr[i], 1);
     }
 
     p = new int[256];
@@ -304,12 +306,14 @@ int main(int argc, char* argv[]) {
 
     for(int i = 0; i < height * width; i++)
         if(gamma_ == 0)
-            arr[i] = (char)sRGB(arr[i]);
-        else arr[i] = (char)GammaCorrection(arr[i], -1);
+            arr[i] = sRGB(arr[i]);
+        else arr[i] = GammaCorrection(arr[i], -1);
 
     OutputImage();
 
     delete [] arr;
+    delete [] buffer;
+    delete [] p;
 
     return 0;
 }
@@ -322,14 +326,19 @@ int InputImage() {
     }
     if(fscanf(fin, "P%d\n%d %d\n%d\n", &format, &width, &height, &a) != 4) {
         std::cerr << "Something wrong with input file.\n";
+        fclose(fin);
         return 1;
     }
     if(format != 5) {
         std::cerr << "File has wrong format!\n";
+        fclose(fin);
         return 1;
     }
-    arr = new uchar[height * width];
-    fread(arr, 1, width * height, fin);
+    arr = new double[height * width];
+    buffer = new uchar[height * width];
+    fread(buffer, 1, width * height, fin);
+    for(int i = 0; i < height * width; i++)
+        arr[i] = (double)buffer[i];
     fclose(fin);
     return 0;
 }
@@ -341,7 +350,9 @@ int OutputImage() {
         return 1;
     }
     fprintf_s(fout, "P%d\n%d %d\n%d\n", format, width, height, a);
-    fwrite(arr, 1, width * height, fout);
+    for(int i = 0; i < height * width; i++)
+        buffer[i] = (uchar)arr[i];
+    fwrite(buffer, 1, width * height, fout);
     fclose(fout);
     return 0;
 }
