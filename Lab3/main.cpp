@@ -130,7 +130,7 @@ void Halftone() {
     };
     for(int i = 0; i < 4; i++)
         for(int j = 0; j < 4; j++)
-            M[i][j] = (M[i][j] + 1) / 16 - 0.5;
+            M[i][j] = M[i][j] / 16 - 0.5;
     for(int i = 0; i < height; i++)
         for(int j = 0; j < width; j++) {
             int color = (int)arr[i * width + j] + 255 * M[i % 4][j % 4];
@@ -352,6 +352,9 @@ int OutputImage() {
     FILE* fout = fopen(filename_out, "wb");
     if(fout == NULL) {
         std::cerr << "Cannot create output file!\n";
+        delete [] arr;
+        delete [] buffer;
+        delete [] p;
         return 1;
     }
     fprintf_s(fout, "P%d\n%d %d\n%d\n", format, width, height, a);
