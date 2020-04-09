@@ -303,9 +303,13 @@ int main(int argc, char* argv[]) {
         case 7:
             Halftone();
             break;
-        default:
+        default: {
             std::cerr << "Wrong number of dithering!\n";
+            delete[] arr;
+            delete[] buffer;
+            delete[] p;
             return 1;
+        }
     }
 
     for(int i = 0; i < height * width; i++) {
