@@ -90,7 +90,7 @@ char* MakeName(int n, char* temp) {
     answer = new char[100];
     for(int j = 0; j < 100; j++)
         answer[j] = '\0';
-    for(i = 0; i < strlen(temp); i++)
+    for(i = strlen(temp) - 1; i >= 0; i--)
         if(temp[i] == '.')
             break;
     strncat(answer, temp, i);
@@ -110,9 +110,9 @@ int main(int argc, char* argv[]) {
         std::cerr << "Wrong arguments\n";
         return 1;
     }
-
     if(count_in == 1) {
-        InputImage(3, filename_in);
+        if(InputImage(3, filename_in))
+            return 1;
         first = new double[width * height];
         second = new double[width * height];
         third = new double[width * height];
@@ -127,7 +127,8 @@ int main(int argc, char* argv[]) {
     }
 
     else {
-        InputImage(1, MakeName(1, filename_in));
+        if(InputImage(1, MakeName(1, filename_in)))
+            return 1;
         first = new double[width * height];
         second = new double[width * height];
         third = new double[width * height];
@@ -135,12 +136,14 @@ int main(int argc, char* argv[]) {
             first[i] = (double)arr[i];
         delete[] arr;
 
-        InputImage(1, MakeName(2, filename_in));
+        if(InputImage(1, MakeName(2, filename_in)))
+            return 1;
         for(int i = 0; i < width * height; i++)
             second[i] = (double)arr[i];
         delete[] arr;
 
-        InputImage(1, MakeName(3, filename_in));
+        if(InputImage(1, MakeName(3, filename_in)))
+            return 1;
         for(int i = 0; i < width * height; i++)
             third[i] = (double)arr[i];
         delete[] arr;
@@ -157,9 +160,12 @@ int main(int argc, char* argv[]) {
     }
 
     else {
-        OutputImage(5, first, MakeName(1, filename_out));
-        OutputImage(5, second, MakeName(2, filename_out));
-        OutputImage(5, third, MakeName(3, filename_out));
+        if(OutputImage(5, first, MakeName(1, filename_out)))
+            return 1;
+        if(OutputImage(5, second, MakeName(2, filename_out)))
+            return 1;
+        if(OutputImage(5, third, MakeName(3, filename_out)))
+            return 1;
     }
 
     ClearMemory();

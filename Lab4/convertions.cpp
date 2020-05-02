@@ -4,7 +4,16 @@
 
 #include "convertions.h"
 #include <cmath>
+#include <algorithm>
 typedef unsigned char uchar;
+
+double Cast(double value) {
+    if (value > 255)
+        return 255;
+    if (value < 0)
+        return 0;
+    return value;
+}
 
 void CMY_to_RGB(int width, int height, double* first, double* second, double* third) {
     for(int i = 0; i < width * height; i++) {
@@ -107,32 +116,38 @@ void HSV_to_RGB(int width, int height, double* first, double* second, double* th
 }
 
 void YCbCr601_to_RGB(int width, int height, double* first, double* second, double* third) {
-    double y, cb, cr;
+    double y, cb, cr, kr = 0.299, kb = 0.114, r, g, b;
     for(int i = 0; i < width * height; i++) {
-        y = first[i]; cb = second[i]; cr = third[i];
-        first[i] = 298.082 * y / 256.0 + 408.583 * cr / 256.0 - 222.921;
-        second[i] = 298.082 * y / 256.0 - 100.291 * cb / 256.0 - 208.120 * cr / 256.0 + 135.576;
-        third[i] = 298.082 * y / 256.0 + 516.412 * cb / 256.0 - 276.836;
+        y = first[i] / 255.0; cb = second[i] / 255.0 * 2 - 1; cr = third[i] / 255.0 * 2 - 1;
+        r = y + (1 - kr) * cr;
+        g = y - kb * (1 - kb) * cb / (1 - kb - kr) - kr * (1 - kr) * cr / (1 - kb - kr);
+        b = y + (1 - kb) * cb;
+        first[i] = Cast(r * 255);
+        second[i] = Cast(g * 255);
+        third[i] = Cast(b * 255);
     }
 }
 
 void YCbCr709_to_RGB(int width, int height, double* first, double* second, double* third) {
-    double y, cb, cr;
+    double y, cb, cr, kr = 0.2126, kb = 0.0722, r, g, b;
     for(int i = 0; i < width * height; i++) {
-        y = first[i]; cb = second[i]; cr = third[i];
-        first[i] = y + 1.402 * (cr - 128);
-        second[i] = y - 0.344136 * (cb - 128) - 0.714136 * (cr - 128);
-        third[i] = y + 1.772 * (cb - 128);
+        y = first[i] / 255.0; cb = second[i] / 255.0 * 2 - 1; cr = third[i] / 255.0 * 2 - 1;
+        r = y + (1 - kr) * cr;
+        g = y - kb * (1 - kb) * cb / (1 - kb - kr) - kr * (1 - kr) * cr / (1 - kb - kr);
+        b = y + (1 - kb) * cb;
+        first[i] = Cast(r * 255);
+        second[i] = Cast(g * 255);
+        third[i] = Cast(b * 255);
     }
 }
 
 void YCoCg_to_RGB(int width, int height, double* first, double* second, double* third) {
     double y, co, cg;
     for(int i = 0; i < width * height; i++) {
-        y = first[i]; cg = second[i]; co = third[i];
-        first[i] = y - cg + co;
-        second[i] = y + cg;
-        third[i] = y - cg - co;
+        y = first[i] / 255.0; co = second[i] / 255.0 - 0.5; cg = third[i] / 255.0 - 0.5;
+        first[i] = Cast((y - cg + co) * 255);
+        second[i] = Cast((y + cg) * 255);
+        third[i] = Cast((y - cg - co) * 255);
     }
 }
 
@@ -145,28 +160,28 @@ void RGB_to_CMY(int width, int height, double* first, double* second, double* th
 }
 
 void RGB_to_HSL(int width, int height, double* first, double* second, double* third) {
-    double r, g, b, h, s, l, max, min;
+    double r, g, b, h, s, l, max_, min_;
     for(int i = 0; i < width * height; i++) {
         r = first[i] / 255.0; g = second[i] / 255.0; b = third[i] / 255.0;
-        max = __max(__max(r, g), b);
-        min = __min(__min(r, g), b);
-        l = (max + min) / 2.0;
-        if((l == 0) || (max == min))
+        max_ = std::max(std::max(r, g), b);
+        min_ = std::min(std::min(r, g), b);
+        l = (max_ + min_) / 2.0;
+        if((l == 0) || (max_ == min_))
             s = 0;
         else if(l <= 0.5)
-            s = (max - min) / (2 * l);
+            s = (max_ - min_) / (2 * l);
         else
-            s = (max - min) / (2 - 2 * l);
-        if(max == min)
+            s = (max_ - min_) / (2 - 2 * l);
+        if(max_ == min_)
             h = 0;
-        if((max == r) && (g >= b))
-            h = 60 * (g - b) / (max - min);
-        else if((max == r) && (g < b))
-            h = 60 * (g - b) / (max - min) + 360;
-        else if(max == g)
-            h = 60 * (b - r) / (max - min) + 120;
-        else if(max == b)
-            h = 60 * (r - g) / (max - min) + 240;
+        if((max_ == r) && (g >= b))
+            h = 60 * (g - b) / (max_ - min_);
+        else if((max_ == r) && (g < b))
+            h = 60 * (g - b) / (max_ - min_) + 360;
+        else if(max_ == g)
+            h = 60 * (b - r) / (max_ - min_) + 120;
+        else if(max_ == b)
+            h = 60 * (r - g) / (max_ - min_) + 240;
         first[i] = h * 255 / 360;
         second[i] = s * 255;
         third[i] = l * 255;
@@ -175,29 +190,29 @@ void RGB_to_HSL(int width, int height, double* first, double* second, double* th
 }
 
 void RGB_to_HSV(int width, int height, double* first, double* second, double* third) {
-    double min, max, delta, r, g, b, h, s, v;
+    double min_, max_, delta, r, g, b, h, s, v;
     for(int i = 0; i < width * height; i++) {
         r = first[i] / 255.0; g = second[i] / 255.0; b = third[i] / 255.0;
-        max = __max(__max(r, g), b);
-        min = __min(__min(r, g), b);
-        v = max;
+        max_ = std::max(std::max(r, g), b);
+        min_ = std::min(std::min(r, g), b);
+        v = max_;
         third[i] = v * 255;
-        delta = max - min;
+        delta = max_ - min_;
         if (delta < 0.00001) {
             second[i] = 0;
             first[i] = 0;
             continue;
         }
-        if (max > 0)
-            s = (delta / max);
+        if (max_ > 0)
+            s = (delta / max_);
         else {
             second[i] = 0;
             first[i] = 0;
             continue;
         }
-        if (r >= max)
+        if (r >= max_)
             h = (g - b) / delta;
-        else if (g >= max)
+        else if (g >= max_)
             h = 2.0 + (b - r) / delta;
         else
             h = 4.0 + (r - g) / delta;
@@ -212,31 +227,37 @@ void RGB_to_HSV(int width, int height, double* first, double* second, double* th
 }
 
 void RGB_to_YCbCr601(int width, int height, double* first, double* second, double* third) {
-    double r, g, b;
+    double r, g, b, kr = 0.299, kb = 0.114, y, cb, cr;
     for(int i = 0; i < width * height; i++) {
-        r = first[i]; g = second[i]; b = third[i];
-        first[i] = 16 + 65.738 * r / 256.0 + 129.057 * g / 256.0 + 25.064 * b / 256.0;
-        second[i] = 128 - 37.945 * r / 256.0 - 74.494 * g / 256.0 + 112.439 * b / 256.0;
-        third[i] = 128 + 112.439 * r / 256.0 - 94.154 * g / 256.0 - 18.285 * b / 256.0;
+        r = first[i] / 255.0; g = second[i] / 255.0; b = third[i] / 255.0;
+        y = kr * r + (1 - kb - kr) * g + kb * b;
+        cb = (b - y) / (1 - kb) + 1;
+        cr = (r - y) / (1 - kr) + 1;
+        first[i] = Cast(y * 255);
+        second[i] = Cast(cb * 255 / 2);
+        third[i] = Cast(cr * 255 / 2);
     }
 }
 
 void RGB_to_YCbCr709(int width, int height, double* first, double* second, double* third) {
-    double r, g, b;
+    double r, g, b, kr = 0.2126, kb = 0.0722, y, cb, cr;
     for(int i = 0; i < width * height; i++) {
-        r = first[i]; g = second[i]; b = third[i];
-        first[i] = 0.299 * r + 0.587 * g + 0.114 * b;
-        second[i] = 128 - 0.168736 * r - 0.331264 * g + 0.5 * b;
-        third[i] = 128 + 0.5 * r - 0.418688 * g - 0.081312 * b;
+        r = first[i] / 255.0; g = second[i] / 255.0; b = third[i] / 255.0;
+        y = kr * r + (1 - kb - kr) * g + kb * b;
+        cb = (b - y) / (1 - kb) + 1;
+        cr = (r - y) / (1 - kr) + 1;
+        first[i] = Cast(y * 255);
+        second[i] = Cast(cb * 255 / 2);
+        third[i] = Cast(cr * 255 / 2);
     }
 }
 
 void RGB_to_YCoCg(int width, int height, double* first, double* second, double* third) {
     double r, g, b;
     for(int i = 0; i < width * height; i++) {
-        r = first[i]; g = second[i]; b = third[i];
-        first[i] = 0.25 * r + 0.5 * g + 0.25 * b;
-        second[i] = -0.25 * r + 0.5 * g - 0.25 * b;
-        third[i] = 0.5 * r - 0.5 * b;
+        r = first[i] / 255.0; g = second[i] / 255.0; b = third[i] / 255.0;
+        first[i] = Cast((0.25 * r + 0.5 * g + 0.25 * b) * 255);
+        third[i] = Cast((-0.25 * r + 0.5 * g - 0.25 * b + 0.5) * 255);
+        second[i] = Cast((0.5 * r - 0.5 * b + 0.5) * 255);
     }
 }

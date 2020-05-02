@@ -6,13 +6,13 @@
 
 #IncludeRegexTransform: 
 
-D:/Desktop/LABS/2sem/KGiG/Lab4/convertions.h
-
-D:/Desktop/LABS/2sem/KGiG/Lab4/main.cpp
-iostream
--
-string.h
--
+D:/Desktop/LABS/2sem/KGiG/Lab4/convertions.cpp
 convertions.h
+D:/Desktop/LABS/2sem/KGiG/Lab4/convertions.h
+cmath
+-
+algorithm
+-
+
 D:/Desktop/LABS/2sem/KGiG/Lab4/convertions.h
 
